@@ -5,7 +5,7 @@ import {getPokemons, getPokemonDetails} from '../api/pokemon'
 
 export default function Pokedex({navigation}){
   const [pokemons, setPokemons] = useState([])
-  console.log(pokemons)
+  const [nextUrl, setNextUrl] = useState(null);
   useEffect(() => {
     (async()=>{
       await getPokemonsData()
@@ -13,7 +13,8 @@ export default function Pokedex({navigation}){
   }, [])
   const getPokemonsData = async () => {
     try {
-      const data = await getPokemons()
+      const data = await getPokemons(nextUrl)
+      setNextUrl(data.next)
       const pokemonsArray = [];
       for await (const pokemon of data.results) { // for await of loop to wait for each pokemon to be fetched
          const pokemonData = await getPokemonDetails(pokemon.url)
@@ -30,14 +31,9 @@ export default function Pokedex({navigation}){
       console.log(error)
     }
   }
-     console.log('Pokedex')
   return (
-    <SafeAreaView style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    }}>
-     <PokemonList pokemones={pokemons}/>
+    <SafeAreaView>
+     <PokemonList pokemones={pokemons} loadPokemones={getPokemonsData} isNext={nextUrl}/>
     </SafeAreaView>
   )
 }
